@@ -1,0 +1,146 @@
+{
+    "variables": {
+      "applicationId": "2aa24266-464f-4bbc-8464-ce46c0012012",
+      "apiKey": "68hla_cbIEEmM3lNt8ZaWnyZScWj5zJMzEyRCZX80OTkDCi7m3KveK_Q",
+      "signingKey": "C+SsXsKDPVDdR0TQkIfxOzSP5NxnwXN0VasCaqyCJOU=",
+      "signingKeyId": "#{UUID()}",
+      "clientSecret": "ORTdX6tlluT1CXJSCfZF53HiCAZvhr85u8vR7D73evDb0gcmxfz7UIyb",
+      "defaultTenantId": "d7d09513-a3f5-401c-9685-34ab6c552453",
+      "adminEmail": "admin@codend.com",
+      "adminPassword": "password",
+      "adminUserId": "00000000-0000-0000-0000-000000000001",
+      "fredEmail": "fred@codend.com",
+      "barneyEmail": "barney@codend.com",
+      "userPassword": "password",
+      "userUserId": "#{UUID()}",
+      "user2UserId": "#{UUID()}",
+      "issuer": "https://codend.fusionauth.com",
+      "lambdaId": "d27d4083-e3f0-4cc6-bddd-a8cd0cd62cc2"
+    },
+    "apiKeys": [
+      {
+        "key": "#{apiKey}",
+        "description": "Unrestricted API key"
+      }
+    ],
+    "requests": [
+      {
+        "method": "PATCH",
+        "url": "/api/tenant/#{defaultTenantId}",
+        "body": {
+          "tenant": {
+            "issuer": "#{issuer}"
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/api/key/import/#{signingKeyId}",
+        "tenantId": "#{defaultTenantId}",
+        "body": {
+          "key": {
+            "algorithm": "HS256",
+            "name": "For Codend-backend",
+            "secret": "#{signingKey}",
+            "type": "HMAC"
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/api/lambda/#{lambdaId}",
+        "body": {
+          "lambda": {
+            "body": "function populate(jwt, user, registration) {\r\n\tjwt.imageUrl = user.imageUrl;\r\n}\r\n",
+            "debug": false,
+            "engineType": "GraalJS",
+            "name": "Add ImageUrl to JWT token.",
+            "type": "JWTPopulate"
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/api/application/#{applicationId}",
+        "tenantId": "#{defaultTenantId}",
+        "body": {
+          "application": {
+            "name": "Codend-backend",
+            "oauthConfiguration": {
+              "authorizedRedirectURLs": [
+                "http://localhost:3000/oauth-callback"
+              ],
+              "logoutURL": "http://localhost:4200/",
+              "clientSecret": "#{clientSecret}",
+              "enabledGrants": [
+                "authorization_code",
+                "refresh_token"
+              ]
+            },
+            "jwtConfiguration": {
+              "enabled": true,
+              "accessTokenKeyId": "#{signingKeyId}",
+              "idTokenKeyId": "#{signingKeyId}"
+            },
+            "lambdaConfiguration": {
+              "accessTokenPopulateId": "#{lambdaId}"
+            }
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/api/user/registration/#{adminUserId}",
+        "body": {
+          "registration": {
+            "applicationId": "#{FUSIONAUTH_APPLICATION_ID}",
+            "roles": [
+              "admin"
+            ]
+          },
+          "roles": [
+            "admin"
+          ],
+          "skipRegistrationVerification": true,
+          "user": {
+            "email": "#{adminEmail}",
+            "firstName": "Mister",
+            "lastName": "Administrator",
+            "password": "#{adminPassword}"
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/api/user/registration/#{userUserId}",
+        "body": {
+          "user": {
+            "email": "#{fredEmail}",
+            "firstName": "Fred",
+            "lastName": "Flintstone",
+            "password": "#{userPassword}",
+            "imageUrl": "/avatars/9.png"
+          },
+          "registration": {
+            "applicationId": "#{applicationId}"
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "url": "/api/user/registration/#{user2UserId}",
+        "body": {
+          "user": {
+            "email": "#{barneyEmail}",
+            "firstName": "Barney",
+            "lastName": "Rubble",
+            "password": "#{userPassword}",
+            "imageUrl": "/avatars/15.png"
+          },
+          "registration": {
+            "applicationId": "#{applicationId}"
+          }
+        }
+      }
+    ]
+  }
