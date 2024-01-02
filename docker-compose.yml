@@ -3,13 +3,12 @@ version: "3.8"
 services:
   nginx:
     container_name: codend_nginx
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
-
-    image: nginx:1.25.3
     ports:
       - "8080:443"
+      - "8081:444"
       - "9011:9011"
     depends_on:
       codendapi:
@@ -18,23 +17,22 @@ services:
         condition: service_started
       fusionauth:
         condition: service_started
-
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -f http://backend:5000/",
-          "||",
-          "curl -f http://fusionauth:9011/api/status"
-        ]
     volumes:
+      - "./logs/:/var/log/nginx/:rw"
       - "./nginx.conf:/etc/nginx/nginx.conf:ro"
+      # setup ssl certificates path
+      # - "./ssl/codend.key:/etc/ssl/private/codend-selfsigned.key"
+      # - "./ssl/codend.crt:/etc/ssl/certs/codend-selfsigned.crt"
     networks:
       - codend_app
 
   codendui:
     container_name: codend_ui
     image: maksimowiczm/codendui
+    build:
+      context: ./CodendRemix
+      dockerfile: ./Dockerfile
+      target: production
     depends_on:
       codendapi:
         condition: service_started
@@ -46,6 +44,9 @@ services:
   codendapi:
     container_name: codend_api
     image: maksimowiczm/codendapi
+    build:
+      context: ./Codend
+      dockerfile: ./src/api/Codend.Api/Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
