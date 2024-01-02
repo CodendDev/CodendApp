@@ -1,0 +1,6 @@
+[submodule "Codend"]
+	path = Codend
+	url = https://github.com/CodendDev/Codend
+[submodule "CodendRemix"]
+	path = CodendRemix
+	url = https://github.com/CodendDev/CodendRemix
