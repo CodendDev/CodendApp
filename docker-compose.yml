@@ -37,6 +37,7 @@ services:
       codendapi:
         condition: service_started
     environment:
+      SETTINGS: DEVELOPMENT # due to self-signed certificates
       API_SERVER: http://codendapi:5000
     networks:
       - codend_app
