@@ -4,6 +4,10 @@ This is not production ready. You have to configure FusionAuth and PostgreSQL
 secrets by yourself. You can also use your own SSL certificate customizing nginx
 ssl volumes in docker-compose.
 
+## Showcase video
+
+[CodendApp Showcase Video on YouTube](https://www.youtube.com/watch?v=7UjuAdRjDh0)
+
 ## Run application
 
 ### using Docker Hub images
